@@ -84,7 +84,15 @@ If neither works for your local setup, you can apply the included SQL manually:
 docker exec -i event-platform-mysql mysql -uroot -proot events_db < drizzle/0000_familiar_namora.sql
 ```
 
-### 6) Run the app
+### 6) Seed mock data (optional)
+
+This repo includes a starter dataset in `drizzle/seed.sql`.
+
+```bash
+docker exec -i event-platform-mysql mysql -uroot -proot events_db < drizzle/seed.sql
+```
+
+### 7) Run the app
 
 ```bash
 npm run dev
