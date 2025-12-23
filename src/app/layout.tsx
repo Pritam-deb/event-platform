@@ -1,8 +1,9 @@
 import "./globals.css";
+import { Providers } from "./providers";
 
 export const metadata = {
-  title: "Events Platform",
-  description: "Events management system",
+  title: "Event Management",
+  description: "Events CRUD platform",
 };
 
 export default function RootLayout({
@@ -12,7 +13,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

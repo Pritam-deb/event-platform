@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@planetscale/database": "^1.19.0",
+    "@tanstack/react-query": "^5.90.12",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.1",
+    "framer-motion": "^12.23.26",
     "mysql2": "^3.16.0",
     "next": "16.1.1",
     "react": "19.2.3",
