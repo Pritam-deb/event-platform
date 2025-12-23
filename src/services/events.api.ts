@@ -28,3 +28,9 @@ export const updateEvent = async (
         body: JSON.stringify(input),
     });
 };
+
+export const deleteEvent = async (id: string) => {
+    await fetcher(`/api/events/${id}`, {
+        method: 'DELETE',
+    });
+};
