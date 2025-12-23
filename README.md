@@ -100,6 +100,29 @@ npm run dev
 
 Open `http://localhost:3000`.
 
+## Solana NFT gallery (development network)
+
+This repo includes a minimal, read-only NFT gallery at `http://localhost:3000/nfts`.
+
+### Prerequisites
+
+- Phantom wallet browser extension installed
+- Phantom set to Solana development network
+
+### Configuration
+
+Optionally set a custom Solana RPC endpoint (defaults to the Solana development network):
+
+```bash
+NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
+```
+
+### Usage
+
+- Run the app and open `http://localhost:3000/nfts`
+- Click `Connect Phantom` and approve the connection
+- The page lists NFTs owned by the connected wallet (Solana development network)
+
 ## API reference
 
 ### `GET /api/events`
@@ -132,6 +155,7 @@ All DB configuration is read from environment variables:
 - `DB_USER` (example: `root`)
 - `DB_PASSWORD` (example: `root`)
 - `DB_NAME` (example: `events_db`)
+- `NEXT_PUBLIC_SOLANA_RPC_URL` (optional): Solana RPC URL (defaults to the development network)
 
 ## Assumptions or notes
 
