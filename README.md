@@ -32,6 +32,7 @@ npm ci
 ### 3) Start MySQL (Docker)
 
 This project assumes a local MySQL instance with:
+
 - database: `events_db`
 - user: `root`
 - password: `root`
@@ -90,6 +91,29 @@ npm run dev
 ```
 
 Open `http://localhost:3000`.
+
+## API reference
+
+### `GET /api/events`
+
+Returns a list of events. Supports offset-based pagination and optional date filtering.
+
+Query parameters:
+
+- `limit` (number, optional): Max items to return. When provided (or when `offset` is provided), enables pagination. Max `200`.
+- `offset` (number, optional): Number of items to skip before returning results.
+- `start_date` (string, optional): Filter events where `startAt >= start_date`. Accepts `YYYY-MM-DD` or an ISO date-time string.
+- `end_date` (string, optional): Filter events where `startAt <= end_date`. Accepts `YYYY-MM-DD` or an ISO date-time string.
+
+Response shape:
+
+- `data`: Array of events (backward compatible with previous consumers reading `data`).
+- `meta`: Pagination metadata `{ totalCount, currentPage, itemsPerPage, limit, offset }`.
+- `error`: Error message string when request fails.
+
+Errors:
+
+- `400` when query parameters are invalid (example: non-integer `limit`, invalid `start_date`, or `start_date > end_date`).
 
 ## Environment variables
 

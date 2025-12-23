@@ -31,3 +31,11 @@ export type CreateEventInput = {
 };
 
 export type UpdateEventInput = Partial<CreateEventInput>;
+
+export type PaginationMeta = {
+    totalCount: number;
+    currentPage: number;
+    itemsPerPage: number;
+    limit: number;
+    offset: number;
+};

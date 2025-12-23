@@ -1,6 +1,6 @@
 import { db } from '@/db';
 import { events } from '@/db/schema/events';
-import { eq } from 'drizzle-orm';
+import { and, desc, eq, gte, lte, sql } from 'drizzle-orm';
 import {
     CreateEventInput,
     UpdateEventInput,
@@ -30,6 +30,46 @@ export const createEvent = async (input: CreateEventInput) => {
 
 export const getAllEvents = async () => {
     return db.select().from(events);
+};
+
+type ListEventsOptions = {
+    limit?: number;
+    offset?: number;
+    startDate?: Date;
+    endDate?: Date;
+};
+
+export const listEvents = async (opts: ListEventsOptions) => {
+    const conditions = [];
+
+    if (opts.startDate) conditions.push(gte(events.endAt, opts.startDate));
+    if (opts.endDate) conditions.push(lte(events.startAt, opts.endDate));
+
+    const whereClause = conditions.length ? and(...conditions) : undefined;
+
+    const baseQuery = db.select().from(events);
+    const filteredQuery = whereClause ? baseQuery.where(whereClause) : baseQuery;
+
+    const orderedQuery = filteredQuery.orderBy(desc(events.startAt));
+
+    const paginatedQuery =
+        typeof opts.limit === 'number'
+            ? orderedQuery.limit(opts.limit).offset(opts.offset ?? 0)
+            : orderedQuery;
+
+    const [items, totalRows] = await Promise.all([
+        paginatedQuery,
+        (async () => {
+            const countBase = db
+                .select({ count: sql<number>`count(*)` })
+                .from(events);
+            const countQuery = whereClause ? countBase.where(whereClause) : countBase;
+            const result = await countQuery;
+            return Number(result[0]?.count ?? 0);
+        })(),
+    ]);
+
+    return { items, totalCount: totalRows };
 };
 
 export const getEventById = async (id: string) => {

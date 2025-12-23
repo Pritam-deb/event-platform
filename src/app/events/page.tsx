@@ -122,11 +122,58 @@ function formatCompactNumber(value: number) {
 }
 
 export default function EventsPage() {
-  const { data, isLoading, error } = useEvents();
   const [now] = useState(() => Date.now());
+  const [rangePreset, setRangePreset] = useState<
+    "1D" | "7D" | "1M" | "3M" | "Custom"
+  >("7D");
+  const [customStartDate, setCustomStartDate] = useState("");
+  const [customEndDate, setCustomEndDate] = useState("");
+  const [page, setPage] = useState(1);
+  const limit = 10;
 
-  const events = data ?? [];
-  const totalEvents = events.length > 0 ? events.length : isLoading ? 1205 : 0;
+  const toDateParam = (d: Date) => {
+    const year = d.getUTCFullYear();
+    const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(d.getUTCDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const start_date = (() => {
+    if (rangePreset === "Custom") return customStartDate || undefined;
+    const end = new Date(now);
+    end.setUTCHours(0, 0, 0, 0);
+    const days =
+      rangePreset === "1D"
+        ? 1
+        : rangePreset === "7D"
+        ? 7
+        : rangePreset === "1M"
+        ? 30
+        : 90;
+    const start = new Date(end);
+    start.setUTCDate(start.getUTCDate() - (days - 1));
+    start.setUTCHours(0, 0, 0, 0);
+    return toDateParam(start);
+  })();
+
+  const end_date = (() => {
+    if (rangePreset === "Custom") return customEndDate || undefined;
+    const end = new Date(now);
+    end.setUTCHours(0, 0, 0, 0);
+    return toDateParam(end);
+  })();
+
+  const offset = (page - 1) * limit;
+  const { data, isLoading, error } = useEvents({
+    limit,
+    offset,
+    start_date,
+    end_date,
+  });
+
+  const events = data?.items ?? [];
+  const totalCount = data?.meta?.totalCount ?? events.length;
+  const totalEvents = totalCount > 0 ? totalCount : isLoading ? 1205 : 0;
   const upcomingEvents =
     events.length > 0
       ? events.filter((e) => e.eventStatus === "ACTIVE").length
@@ -149,6 +196,9 @@ export default function EventsPage() {
       : isLoading
       ? 5
       : 0;
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / limit));
+  const currentPage = Math.min(Math.max(page, 1), totalPages);
 
   return (
     <motion.main
@@ -208,13 +258,17 @@ export default function EventsPage() {
 
             <div className="flex items-center gap-2">
               <div className="flex items-center rounded-xl border border-white/10 bg-white/5 p-1 text-xs text-white/70 backdrop-blur">
-                {["1D", "7D", "1M", "3M", "Custom"].map((label) => (
+                {(["1D", "7D", "1M", "3M", "Custom"] as const).map((label) => (
                   <button
                     key={label}
                     type="button"
+                    onClick={() => {
+                      setRangePreset(label);
+                      setPage(1);
+                    }}
                     className={[
                       "rounded-lg px-3 py-1.5 transition",
-                      label === "7D"
+                      label === rangePreset
                         ? "bg-white/10 text-white"
                         : "hover:bg-white/5",
                     ].join(" ")}
@@ -231,6 +285,35 @@ export default function EventsPage() {
               </button>
             </div>
           </div>
+
+          {rangePreset === "Custom" ? (
+            <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="flex items-center gap-2">
+                <div className="text-xs text-white/50">Start</div>
+                <input
+                  type="date"
+                  value={customStartDate}
+                  onChange={(e) => {
+                    setCustomStartDate(e.target.value);
+                    setPage(1);
+                  }}
+                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 backdrop-blur focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="text-xs text-white/50">End</div>
+                <input
+                  type="date"
+                  value={customEndDate}
+                  onChange={(e) => {
+                    setCustomEndDate(e.target.value);
+                    setPage(1);
+                  }}
+                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 backdrop-blur focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+                />
+              </div>
+            </div>
+          ) : null}
 
           <div className="mt-4 grid gap-4 md:grid-cols-4">
             <div className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/7 to-white/3 p-5 backdrop-blur">
@@ -364,18 +447,30 @@ export default function EventsPage() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage <= 1}
                 className="grid h-8 w-8 place-items-center rounded-lg border border-white/10 bg-white/5 hover:bg-white/10"
               >
                 ‹
               </button>
               <div className="flex items-center gap-1">
-                {["1", "2", "3", "4", "5"].map((p) => (
+                {(() => {
+                  const start = Math.max(
+                    1,
+                    Math.min(currentPage - 2, totalPages - 4)
+                  );
+                  const end = Math.min(totalPages, start + 4);
+                  const pages = [];
+                  for (let p = start; p <= end; p += 1) pages.push(p);
+                  return pages;
+                })().map((p) => (
                   <button
-                    key={p}
+                    key={String(p)}
                     type="button"
+                    onClick={() => setPage(p)}
                     className={[
                       "grid h-8 w-8 place-items-center rounded-lg border border-white/10 bg-white/5 hover:bg-white/10",
-                      p === "2" ? "bg-sky-600/30 text-white" : "",
+                      p === currentPage ? "bg-sky-600/30 text-white" : "",
                     ].join(" ")}
                   >
                     {p}
@@ -384,6 +479,8 @@ export default function EventsPage() {
               </div>
               <button
                 type="button"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage >= totalPages}
                 className="grid h-8 w-8 place-items-center rounded-lg border border-white/10 bg-white/5 hover:bg-white/10"
               >
                 ›
