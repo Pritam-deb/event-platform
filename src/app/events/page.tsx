@@ -3,6 +3,7 @@
 import { useEvents } from "@/hooks/useEvents";
 import { EventTable } from "@/components/events/EventTable";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function EventsPage() {
   const { data, isLoading, error } = useEvents();
@@ -24,12 +25,12 @@ export default function EventsPage() {
     >
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl font-semibold">Events</h1>
-        <a
+        <Link
           href="/events/create"
           className="px-4 py-2 bg-black text-white rounded-md text-sm"
         >
           Create Event
-        </a>
+        </Link>
       </div>
 
       {data && <EventTable events={data} />}
