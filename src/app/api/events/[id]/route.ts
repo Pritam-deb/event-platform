@@ -8,10 +8,11 @@ import {
 import { ApiResponse } from '@/utils/api-response';
 
 export async function GET(
-    _: Request,
-    { params }: { params: { id: string } }
+    req: Request,
+    context: { params: Promise<{ id: string }> }
 ) {
-    const event = await getEventById(params.id);
+    const { id } = await context.params;
+    const event = await getEventById(id);
 
     if (!event) {
         return NextResponse.json(
@@ -30,11 +31,13 @@ export async function GET(
 
 export async function PUT(
     req: Request,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await context.params;
         const body = updateEventSchema.parse(await req.json());
-        await updateEvent(params.id, body);
+        console.log('Parsed body:', body);
+        await updateEvent(id, body);
 
         return NextResponse.json({ data: null, error: null });
     } catch {
@@ -47,8 +50,9 @@ export async function PUT(
 
 export async function DELETE(
     _: Request,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
-    await deleteEvent(params.id);
+    const { id } = await context.params;
+    await deleteEvent(id);
     return NextResponse.json({ data: null, error: null });
 }

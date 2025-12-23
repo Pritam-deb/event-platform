@@ -45,6 +45,7 @@ export const updateEvent = async (
     id: string,
     input: UpdateEventInput
 ) => {
+    console.log('Updating event with id:', id, 'and input:', input);
     await db
         .update(events)
         .set({
