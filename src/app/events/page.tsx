@@ -2,6 +2,7 @@
 
 import { useEvents } from "@/hooks/useEvents";
 import { EventTable } from "@/components/events/EventTable";
+import { motion } from "framer-motion";
 
 export default function EventsPage() {
   const { data, isLoading, error } = useEvents();
@@ -15,7 +16,12 @@ export default function EventsPage() {
   }
 
   return (
-    <main className="p-8">
+    <motion.main
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      className="p-8"
+    >
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl font-semibold">Events</h1>
         <a
@@ -27,6 +33,6 @@ export default function EventsPage() {
       </div>
 
       {data && <EventTable events={data} />}
-    </main>
+    </motion.main>
   );
 }

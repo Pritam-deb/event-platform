@@ -3,6 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEventById } from "@/hooks/useEventById";
 import { useDeleteEvent } from "@/hooks/useEventMutations";
+import { motion } from "framer-motion";
 
 export default function EventDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -20,7 +21,12 @@ export default function EventDetailPage() {
   }
 
   return (
-    <main className="p-8 space-y-4 max-w-2xl">
+    <motion.main
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      className="p-8 space-y-4 max-w-2xl"
+    >
       <h1 className="text-2xl font-semibold">{data.title}</h1>
 
       {data.description && <p className="text-gray-700">{data.description}</p>}
@@ -40,6 +46,7 @@ export default function EventDetailPage() {
         </button>
 
         <button
+          disabled={deleteMutation.isPending}
           onClick={() => {
             const confirmed = confirm(
               "Are you sure you want to delete this event?"
@@ -53,9 +60,9 @@ export default function EventDetailPage() {
           }}
           className="px-4 py-2 bg-red-600 text-white rounded"
         >
-          Delete
+          {deleteMutation.isPending ? "Deleting..." : "Delete"}
         </button>
       </div>
-    </main>
+    </motion.main>
   );
 }

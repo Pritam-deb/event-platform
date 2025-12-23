@@ -3,7 +3,7 @@
 import { Event } from "@/types/event";
 import { EventStatusBadge } from "./EventStatusBadge";
 import { motion } from "framer-motion";
-
+import Link from "next/link";
 type Props = {
   events: Event[];
 };
@@ -27,15 +27,27 @@ export function EventTable({ events }: Props) {
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.02 }}
-              className="border-t"
+              className="border-t hover:bg-gray-50 transition cursor-pointer"
             >
-              <td className="px-4 py-2 font-medium">{event.title}</td>
-              <td className="px-4 py-2">
-                {new Date(event.startAt).toLocaleDateString()}
+              <td className="px-4 py-2 font-medium">
+                <Link href={`/events/${event.id}`} className="block">
+                  {event.title}
+                </Link>
               </td>
-              <td className="px-4 py-2">{event.location ?? "—"}</td>
               <td className="px-4 py-2">
-                <EventStatusBadge status={event.eventStatus} />
+                <Link href={`/events/${event.id}`} className="block">
+                  {new Date(event.startAt).toLocaleDateString()}
+                </Link>
+              </td>
+              <td className="px-4 py-2">
+                <Link href={`/events/${event.id}`} className="block">
+                  {event.location ?? "—"}
+                </Link>
+              </td>
+              <td className="px-4 py-2">
+                <Link href={`/events/${event.id}`} className="block">
+                  <EventStatusBadge status={event.eventStatus} />
+                </Link>
               </td>
             </motion.tr>
           ))}
