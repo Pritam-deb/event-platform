@@ -5,8 +5,8 @@ export type Event = {
     location: string | null;
     ticketSold: number;
     totalTickets: number;
-    eventStatus: string;
-    eventType: string;
+    eventStatus: 'DRAFT' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+    eventType: 'ONLINE' | 'OFFLINE';
     eventTag: string | null;
     eventAttendees: number;
     eventRevenue: string;
