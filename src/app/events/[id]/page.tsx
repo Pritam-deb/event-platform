@@ -5,6 +5,8 @@ import { useEventById } from "@/hooks/useEventById";
 import { useDeleteEvent } from "@/hooks/useEventMutations";
 import { motion } from "framer-motion";
 import { EventStatusBadge } from "@/components/events/EventStatusBadge";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { useState } from "react";
 
 function IconSearch(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -199,6 +201,10 @@ export default function EventDetailPage() {
 
   const { data, isLoading, error } = useEventById(id);
   const deleteMutation = useDeleteEvent();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteErrorMessage, setDeleteErrorMessage] = useState<string | null>(
+    null
+  );
 
   const placeholder = {
     title: "Gastonia Ghost Peppers vs. Charleston Dirty Birds",
@@ -327,13 +333,8 @@ export default function EventDetailPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        const confirmed = confirm(
-                          "Are you sure you want to delete this event?"
-                        );
-                        if (!confirmed) return;
-                        deleteMutation.mutate(id, {
-                          onSuccess: () => router.push("/events"),
-                        });
+                        setDeleteErrorMessage(null);
+                        setDeleteDialogOpen(true);
                       }}
                       disabled={deleteMutation.isPending}
                       className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 backdrop-blur hover:bg-white/10 disabled:opacity-60"
@@ -548,6 +549,37 @@ export default function EventDetailPage() {
           </div>
         </section>
       </div>
+
+      <ConfirmDialog
+        open={deleteDialogOpen}
+        title="Delete event"
+        message={`Are you sure you want to delete “${
+          event.title || "this event"
+        }”? This action cannot be undone.`}
+        confirmLabel="Confirm"
+        cancelLabel="Cancel"
+        isConfirming={deleteMutation.isPending}
+        errorMessage={deleteErrorMessage}
+        onCancel={() => {
+          if (deleteMutation.isPending) return;
+          setDeleteDialogOpen(false);
+          setDeleteErrorMessage(null);
+        }}
+        onConfirm={() => {
+          setDeleteErrorMessage(null);
+          deleteMutation.mutate(id, {
+            onSuccess: () => {
+              setDeleteDialogOpen(false);
+              router.push("/events");
+            },
+            onError: (err) => {
+              const message =
+                err instanceof Error ? err.message : "Failed to delete event";
+              setDeleteErrorMessage(message);
+            },
+          });
+        }}
+      />
     </motion.main>
   );
 }

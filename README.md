@@ -1,19 +1,27 @@
 # Event Platform
 
-Simple event management app built with `Next.js` (App Router) + MySQL.
+## Project overview
 
-- UI: `Next.js` + React + Tailwind CSS + Framer Motion
-- Data: MySQL (Docker) + Drizzle ORM
-- Client data fetching: TanStack React Query
+Event management app with an events dashboard, event details view, and CRUD flows (create/update/delete).
+The app uses a MySQL database and exposes a small REST-like API via `Next.js` route handlers.
 
-## Prerequisites
+## Tech stack
+
+- Framework: `Next.js` (App Router) + React
+- Styling: Tailwind CSS
+- Animations: Framer Motion
+- Data layer: MySQL + Drizzle ORM
+- Client caching: TanStack React Query
+- Tooling: TypeScript + ESLint
+
+## Setup instructions
+
+### 1) Prerequisites
 
 - `Node.js` 20+ and `npm`
-- Docker Desktop (or Docker Engine) for MySQL
+- Docker Desktop (or Docker Engine) to run MySQL locally
 
-## Quickstart (clone → run)
-
-### 1) Clone and install dependencies
+### 2) Clone and install dependencies
 
 ```bash
 git clone <YOUR_REPO_URL>
@@ -21,9 +29,12 @@ cd event-platform
 npm ci
 ```
 
-### 2) Start MySQL with Docker
+### 3) Start MySQL (Docker)
 
-This project expects a MySQL database called `events_db` with the `root` user.
+This project assumes a local MySQL instance with:
+- database: `events_db`
+- user: `root`
+- password: `root`
 
 ```bash
 docker run --name event-platform-mysql \
@@ -33,16 +44,16 @@ docker run --name event-platform-mysql \
   -d mysql:8
 ```
 
-If you need to stop/remove it later:
+To stop/remove the container:
 
 ```bash
 docker stop event-platform-mysql
 docker rm event-platform-mysql
 ```
 
-### 3) Configure environment variables
+### 4) Create `.env.local`
 
-Create a file named `.env.local` in the project root:
+Create a `.env.local` file at the project root:
 
 ```bash
 DB_HOST=127.0.0.1
@@ -52,27 +63,27 @@ DB_PASSWORD=root
 DB_NAME=events_db
 ```
 
-### 4) Create the database schema (Drizzle)
+### 5) Apply the database schema
 
-Apply the existing migration:
+This repo includes Drizzle migration files in `drizzle/`.
 
 ```bash
 npx drizzle-kit migrate
 ```
 
-If you prefer pushing schema directly (no SQL migration files needed):
+If you prefer pushing schema directly instead of migrations:
 
 ```bash
 npx drizzle-kit push
 ```
 
-If neither approach works for your setup, you can apply the included SQL manually:
+If neither works for your local setup, you can apply the included SQL manually:
 
 ```bash
 docker exec -i event-platform-mysql mysql -uroot -proot events_db < drizzle/0000_familiar_namora.sql
 ```
 
-### 5) Run the app
+### 6) Run the app
 
 ```bash
 npm run dev
@@ -80,31 +91,24 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-## Useful commands
+## Environment variables
 
-```bash
-npm run lint
-npm run build
-npm run start
-```
+All DB configuration is read from environment variables:
 
-Drizzle helpers:
+- `DB_HOST` (example: `127.0.0.1`)
+- `DB_PORT` (example: `3306`)
+- `DB_USER` (example: `root`)
+- `DB_PASSWORD` (example: `root`)
+- `DB_NAME` (example: `events_db`)
 
-```bash
-npx drizzle-kit studio
-npx drizzle-kit generate
-```
+## Assumptions or notes
 
-## API routes
-
-- `GET /api/events` — list events
-- `POST /api/events` — create event
-- `GET /api/events/:id` — fetch event
-- `PUT /api/events/:id` — update event
-- `DELETE /api/events/:id` — delete event
-
-## Troubleshooting
-
-- `ECONNREFUSED` / can’t connect to MySQL: confirm the container is running with `docker ps` and that `.env.local` uses `DB_HOST=127.0.0.1`.
-- Port `3306` already in use: change the host port (example `-p 3307:3306`) and update `DB_PORT`.
-- Authentication errors: ensure `DB_USER=root` and `DB_PASSWORD=root` match the container environment.
+- The MySQL container uses the default credentials shown above; change them if needed and update `.env.local`.
+- If port `3306` is already in use, map a different host port (example `-p 3307:3306`) and set `DB_PORT=3307`.
+- Some UI elements use placeholder values when optional data is missing.
+- Drizzle config reads DB values from the environment (`drizzle.config.ts`).
+- Helpful commands:
+  - `npm run lint`
+  - `npm run build`
+  - `npm run start`
+  - `npx drizzle-kit studio`
