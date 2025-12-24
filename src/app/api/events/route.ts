@@ -79,10 +79,19 @@ export function parseEventsQuery(searchParams: URLSearchParams) {
 }
 
 export async function GET(req: Request) {
-    try {
-        const { searchParams } = new URL(req.url);
-        const { limit, offset, startDate, endDate } = parseEventsQuery(searchParams);
+    const { searchParams } = new URL(req.url);
+    let parsed: ReturnType<typeof parseEventsQuery>;
 
+    try {
+        parsed = parseEventsQuery(searchParams);
+    } catch (err) {
+        const message =
+            err instanceof Error ? err.message : 'Invalid query parameters';
+        return NextResponse.json({ data: null, error: message }, { status: 400 });
+    }
+
+    try {
+        const { limit, offset, startDate, endDate } = parsed;
         const { items, totalCount } = await listEvents({
             limit,
             offset,
@@ -95,13 +104,16 @@ export async function GET(req: Request) {
         const currentPage =
             safeLimit > 0 ? Math.floor(safeOffset / safeLimit) + 1 : 1;
 
-        const response: ApiResponse<typeof items, {
-            totalCount: number;
-            currentPage: number;
-            itemsPerPage: number;
-            limit: number;
-            offset: number;
-        }> = {
+        const response: ApiResponse<
+            typeof items,
+            {
+                totalCount: number;
+                currentPage: number;
+                itemsPerPage: number;
+                limit: number;
+                offset: number;
+            }
+        > = {
             data: items,
             error: null,
             meta: {
@@ -115,9 +127,17 @@ export async function GET(req: Request) {
 
         return NextResponse.json(response);
     } catch (err) {
-        const message =
-            err instanceof Error ? err.message : 'Invalid query parameters';
-        return NextResponse.json({ data: null, error: message }, { status: 400 });
+        const debug = process.env.DEBUG_DB_ERRORS === 'true';
+        const cause =
+            err instanceof Error && err.cause instanceof Error
+                ? err.cause.message
+                : null;
+        const message = (() => {
+            if (!debug) return 'Database query failed';
+            if (err instanceof Error) return [err.message, cause].filter(Boolean).join('\n');
+            return 'Database query failed';
+        })();
+        return NextResponse.json({ data: null, error: message }, { status: 500 });
     }
 }
 
