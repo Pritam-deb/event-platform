@@ -30,7 +30,7 @@ describe('GET /api/events', () => {
         } as never);
 
         const res = await GET(
-            new Request('http://localhost/api/events?limit=10&offset=20')
+            new Request('https://event-platform-production-3930.up.railway.app/api/events?limit=10&offset=20')
         );
         const body = (await res.json()) as Body;
 

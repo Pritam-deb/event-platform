@@ -1,4 +1,4 @@
-import { db } from '@/db';
+import { getDb } from '@/db';
 import { events } from '@/db/schema/events';
 import { and, desc, eq, gte, lte, sql } from 'drizzle-orm';
 import {
@@ -9,6 +9,7 @@ import {
 
 export const createEvent = async (input: CreateEventInput) => {
     const id = crypto.randomUUID();
+    const db = getDb();
 
     await db.insert(events).values({
         id,
@@ -29,6 +30,7 @@ export const createEvent = async (input: CreateEventInput) => {
 
 
 export const getAllEvents = async () => {
+    const db = getDb();
     return db.select().from(events);
 };
 
@@ -40,6 +42,7 @@ type ListEventsOptions = {
 };
 
 export const listEvents = async (opts: ListEventsOptions) => {
+    const db = getDb();
     const conditions = [];
 
     if (opts.startDate) conditions.push(gte(events.endAt, opts.startDate));
@@ -51,28 +54,32 @@ export const listEvents = async (opts: ListEventsOptions) => {
     const filteredQuery = whereClause ? baseQuery.where(whereClause) : baseQuery;
 
     const orderedQuery = filteredQuery.orderBy(desc(events.startAt));
+    const safeOffset = opts.offset ?? 0;
+    const safeLimit = opts.limit;
 
-    const paginatedQuery =
-        typeof opts.limit === 'number'
-            ? orderedQuery.limit(opts.limit).offset(opts.offset ?? 0)
-            : orderedQuery;
+    const countPromise = (async () => {
+        const countBase = db
+            .select({ count: sql<number>`count(*)` })
+            .from(events);
+        const countQuery = whereClause ? countBase.where(whereClause) : countBase;
+        const result = await countQuery;
+        return Number(result[0]?.count ?? 0);
+    })();
 
-    const [items, totalRows] = await Promise.all([
-        paginatedQuery,
-        (async () => {
-            const countBase = db
-                .select({ count: sql<number>`count(*)` })
-                .from(events);
-            const countQuery = whereClause ? countBase.where(whereClause) : countBase;
-            const result = await countQuery;
-            return Number(result[0]?.count ?? 0);
-        })(),
-    ]);
+    const [allItems, totalRows] = await Promise.all([orderedQuery, countPromise]);
+
+    const items =
+        typeof safeLimit === 'number'
+            ? allItems.slice(safeOffset, safeOffset + safeLimit)
+            : safeOffset > 0
+                ? allItems.slice(safeOffset)
+                : allItems;
 
     return { items, totalCount: totalRows };
 };
 
 export const getEventById = async (id: string) => {
+    const db = getDb();
     const result = await db
         .select()
         .from(events)
@@ -85,6 +92,7 @@ export const updateEvent = async (
     id: string,
     input: UpdateEventInput
 ) => {
+    const db = getDb();
     const updateValues = Object.fromEntries(
         Object.entries(input).filter(([, value]) => value !== undefined)
     ) as UpdateEventInput;
@@ -97,5 +105,6 @@ export const updateEvent = async (
 };
 
 export const deleteEvent = async (id: string) => {
+    const db = getDb();
     await db.delete(events).where(eq(events.id, id));
 };
