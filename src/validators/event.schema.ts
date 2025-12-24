@@ -5,8 +5,8 @@ export const createEventSchema = z.object({
     description: z.string().optional(),
     location: z.string().optional(),
 
-    totalTickets: z.number().int().positive(),
-    eventStatus: z.enum(['DRAFT', 'ACTIVE', 'COMPLETED']),
+    totalTickets: z.number().int().nonnegative(),
+    eventStatus: z.enum(['DRAFT', 'ACTIVE', 'COMPLETED', 'CANCELLED']),
     eventType: z.enum(['ONLINE', 'OFFLINE']),
     eventTag: z.string().optional(),
 

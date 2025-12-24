@@ -8,7 +8,7 @@ import {
 import { ApiResponse } from '@/utils/api-response';
 
 export async function GET(
-    req: Request,
+    _req: Request,
     context: { params: Promise<{ id: string }> }
 ) {
     const { id } = await context.params;
@@ -33,17 +33,32 @@ export async function PUT(
     req: Request,
     context: { params: Promise<{ id: string }> }
 ) {
-    try {
-        const { id } = await context.params;
-        const body = updateEventSchema.parse(await req.json());
-        console.log('Parsed body:', body);
-        await updateEvent(id, body);
+    const { id } = await context.params;
+    const json = await req.json().catch(() => null);
+    const parsed = updateEventSchema.safeParse(json);
 
-        return NextResponse.json({ data: null, error: null });
-    } catch {
+    if (!parsed.success) {
         return NextResponse.json(
             { data: null, error: 'Invalid request body' },
             { status: 400 }
+        );
+    }
+
+    const existing = await getEventById(id);
+    if (!existing) {
+        return NextResponse.json(
+            { data: null, error: 'Event not found' },
+            { status: 404 }
+        );
+    }
+
+    try {
+        await updateEvent(id, parsed.data);
+        return NextResponse.json({ data: null, error: null });
+    } catch {
+        return NextResponse.json(
+            { data: null, error: 'Failed to update event' },
+            { status: 500 }
         );
     }
 }
@@ -53,6 +68,13 @@ export async function DELETE(
     context: { params: Promise<{ id: string }> }
 ) {
     const { id } = await context.params;
+    const existing = await getEventById(id);
+    if (!existing) {
+        return NextResponse.json(
+            { data: null, error: 'Event not found' },
+            { status: 404 }
+        );
+    }
     await deleteEvent(id);
     return NextResponse.json({ data: null, error: null });
 }

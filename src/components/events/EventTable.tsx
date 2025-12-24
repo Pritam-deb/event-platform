@@ -12,7 +12,7 @@ function initialsFromTitle(title: string) {
   return (first + second).toUpperCase();
 }
 
-function formatDateTime(value: Date) {
+function formatDateTime(value: Event["startAt"]) {
   const date = new Date(value);
   return date.toLocaleString(undefined, {
     month: "short",

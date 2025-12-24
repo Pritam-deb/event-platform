@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Event } from "@/types/event";
+import { CreateEventInput, Event } from "@/types/event";
 import clsx from "clsx";
 import { createEventSchema } from "@/validators/event.schema";
 
 type Props = {
   initialData?: Partial<Event>;
-  onSubmit: (data: Partial<Event>) => void;
+  onSubmit: (data: CreateEventInput) => void;
   isSubmitting: boolean;
 };
 
@@ -108,7 +108,7 @@ export function EventForm({ initialData = {}, onSubmit, isSubmitting }: Props) {
         }
 
         setErrors({});
-        onSubmit(form);
+        onSubmit(result.data);
       }}
       className="space-y-5"
     >

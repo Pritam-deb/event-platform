@@ -1,5 +1,5 @@
 import { fetcher } from '@/lib/fetcher';
-import { Event, PaginationMeta } from '@/types/event';
+import { CreateEventInput, Event, PaginationMeta, UpdateEventInput } from '@/types/event';
 
 export type GetEventsParams = {
     limit?: number;
@@ -25,7 +25,7 @@ export const getEventById = async (id: string) => {
     return res.data;
 };
 
-export const createEvent = async (input: Partial<Event>) => {
+export const createEvent = async (input: CreateEventInput) => {
     const res = await fetcher<{ data: { id: string } }>('/api/events', {
         method: 'POST',
         body: JSON.stringify(input),
@@ -35,7 +35,7 @@ export const createEvent = async (input: Partial<Event>) => {
 
 export const updateEvent = async (
     id: string,
-    input: Partial<Event>
+    input: UpdateEventInput
 ) => {
     await fetcher(`/api/events/${id}`, {
         method: 'PUT',

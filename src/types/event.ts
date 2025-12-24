@@ -1,3 +1,5 @@
+export type EventDateValue = Date | string;
+
 export type Event = {
     id: string;
     title: string;
@@ -10,11 +12,11 @@ export type Event = {
     eventTag: string | null;
     eventAttendees: number;
     eventRevenue: string;
-    startAt: Date;
-    endAt: Date;
+    startAt: EventDateValue;
+    endAt: EventDateValue;
     isPublished: boolean;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: EventDateValue;
+    updatedAt: EventDateValue;
 };
 
 export type CreateEventInput = {
@@ -22,8 +24,8 @@ export type CreateEventInput = {
     description?: string;
     location?: string;
     totalTickets: number;
-    eventStatus: string;
-    eventType: string;
+    eventStatus: Event['eventStatus'];
+    eventType: Event['eventType'];
     eventTag?: string;
     startAt: Date;
     endAt: Date;

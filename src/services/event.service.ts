@@ -85,11 +85,13 @@ export const updateEvent = async (
     id: string,
     input: UpdateEventInput
 ) => {
-    console.log('Updating event with id:', id, 'and input:', input);
+    const updateValues = Object.fromEntries(
+        Object.entries(input).filter(([, value]) => value !== undefined)
+    ) as UpdateEventInput;
     await db
         .update(events)
         .set({
-            ...input,
+            ...updateValues,
         })
         .where(eq(events.id, id));
 };

@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { useEffect } from "react";
+import { AppHeader } from "@/components/layout/AppHeader";
+import { AppShell } from "@/components/layout/AppShell";
 
 export default function GlobalError({
   error,
@@ -18,33 +19,15 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body>
-        <motion.main
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
-          className="min-h-screen bg-[#070B14] text-white"
-        >
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-sky-500/10 blur-3xl" />
-            <div className="absolute top-10 left-10 h-[420px] w-[520px] rounded-full bg-emerald-500/10 blur-3xl" />
-            <div className="absolute bottom-0 right-0 h-[520px] w-[720px] rounded-full bg-violet-500/10 blur-3xl" />
-          </div>
-
-          <div className="relative mx-auto max-w-6xl px-6 py-6">
-            <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <div className="text-sm text-white/60">
-                  Event Management /{" "}
-                  <span className="text-white/90">Application Error</span>
-                </div>
-                <h1 className="mt-2 text-xl font-semibold">
-                  Application encountered an error
-                </h1>
-                <p className="mt-1 text-sm text-white/55">
-                  Try reloading this view, or return to the home page.
-                </p>
-              </div>
-
+        <AppShell>
+          <AppHeader
+            breadcrumb={
+              <>
+                Event Management /{" "}
+                <span className="text-white/90">Application Error</span>
+              </>
+            }
+            right={
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
@@ -60,18 +43,28 @@ export default function GlobalError({
                   Home
                 </Link>
               </div>
-            </header>
+            }
+          />
 
-            <section className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
+          <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
+            <div>
+              <h1 className="text-xl font-semibold">
+                Application encountered an error
+              </h1>
+              <p className="mt-1 text-sm text-white/55">
+                Try reloading this view, or return to the home page.
+              </p>
+            </div>
+
+            <div className="mt-5">
               <div className="text-sm font-semibold text-white/90">Details</div>
               <div className="mt-2 break-words rounded-xl border border-white/10 bg-black/20 p-4 text-sm text-white/70">
                 {error.message || "Unknown error"}
               </div>
-            </section>
+            </div>
           </div>
-        </motion.main>
+        </AppShell>
       </body>
     </html>
   );
 }
-
