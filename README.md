@@ -5,6 +5,11 @@
 Event management app with an events dashboard, event details view, and CRUD flows (create/update/delete).
 The app uses a MySQL database and exposes a small REST-like API via `Next.js` route handlers.
 
+## Deployment
+
+Railway (production): https://event-platform-production-3930.up.railway.app/
+
+
 ## Tech stack
 
 - Framework: `Next.js` (App Router) + React
