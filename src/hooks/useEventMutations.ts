@@ -4,6 +4,7 @@ import {
     updateEvent,
     deleteEvent
 } from '@/services/events.api';
+import type { Event } from '@/types/event';
 
 export const useCreateEvent = () => {
     const queryClient = useQueryClient();
@@ -20,8 +21,7 @@ export const useUpdateEvent = (id: string) => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        mutationFn: (input: any) => updateEvent(id, input),
+        mutationFn: (input: Partial<Event>) => updateEvent(id, input),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['events'] });
             queryClient.invalidateQueries({ queryKey: ['event', id] });
